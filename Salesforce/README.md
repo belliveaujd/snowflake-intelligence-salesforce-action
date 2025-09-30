@@ -65,14 +65,10 @@ This folder contains all tools and documentation for setting up and testing Sale
    - Click "New External Client App"
 
 2. **Basic Information**
-   ```
-   External Client App Name: Snowflake Healthcare Integration
-   Description: Integration between Snowflake and Salesforce for healthcare campaigns
-   Contact Email: [your email]
-   Distribution State: Local
-   Description: Integration between Snowflake and Salesforce for healthcare patient campaigns
-   ```
-
+   - **External Client App Name:** Snowflake Healthcare Integration
+   - **Description:** Integration between Snowflake and Salesforce for healthcare campaigns
+   - **Contact Email:** [your email]
+   
 3. **API (Enable OAuth Settings)**
    - **Enable OAuth**
    - **Callback URL**: `https://login.salesforce.com/services/oauth2/success`
@@ -123,33 +119,6 @@ This folder contains all tools and documentation for setting up and testing Sale
    - Never commit `.env` file to version control
    - File is already in `.gitignore`
 
-   example:
-```
-.env
-
-# Logs
-*.log
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Temporary files
-*.tmp
-*.temp
-```
 
 ## Connection Testing
 

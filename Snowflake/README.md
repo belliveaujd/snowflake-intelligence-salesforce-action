@@ -17,7 +17,7 @@ This folder contains all tools and documentation for setting up Snowflake stored
 
 - ✅ Snowflake account with appropriate permissions (ACCOUNTADMIN or equivalent)
 - ✅ Completed Salesforce setup (see `../Salesforce/README.md`)
-- ✅ Salesforce Consumer Key, Consumer Secret, and Instance URL from your External Client App
+- ✅ Salesforce Consumer Key (Client ID), Consumer Secret (Client Secret), and Instance URL from your Salesforce Developer Account
 
 ## Quick Setup Overview
 
@@ -78,6 +78,7 @@ SECRET_STRING = "https://your-instance.my.salesforce.com";  -- ← Replace this
 1. **In Snowflake Web UI:**
    - Navigate to **Worksheets**
    - Copy and paste the entire `00_snowflake_salesforce_e2e_setup.sql` file
+   - Update the 
    - Execute the script
 
 2. **The script will automatically:**

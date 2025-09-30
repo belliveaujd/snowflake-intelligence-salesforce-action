@@ -4,7 +4,7 @@ A comprehensive integration solution that enables **Snowflake Agents to manage S
 
 ## 🎯 Project Overview
 
-This project provides production-ready tools to:
+This project provides demo-ready tools to:
 - ✅ **Connect Snowflake to Salesforce** using OAuth 2.0 Client Credentials Flow
 - ✅ **Manage healthcare campaigns** - create campaigns if they don't exist
 - ✅ **Manage patient contacts** - create contacts using patient_id as unique identifier  
@@ -61,21 +61,6 @@ open README.md
 - ✅ Deploy agent-compatible stored procedures
 - ✅ Run comprehensive tests
 
-## 📋 Prerequisites
-
-### Accounts & Access
-- **Snowflake Account** with ACCOUNTADMIN privileges
-- **Salesforce Developer Account** (free at developer.salesforce.com)
-
-### Tools & Software
-- **Snowflake CLI** installed and configured
-- **Python 3.11+** with `requests` library
-- **Command line access** (Terminal/PowerShell)
-
-### Knowledge Requirements
-- Basic understanding of OAuth 2.0
-- Familiarity with Snowflake and Salesforce concepts
-- Command line usage
 
 ## 🎯 Key Features
 
