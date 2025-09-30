@@ -49,16 +49,16 @@ This folder contains all tools and documentation for setting up and testing Sale
    - NOTE: you do not have to enable MFA.  If it asks for your phone number, hit the skip option
 
 
-## External Client App Configuration (Summer '25+)
+### Step 2: External Client App Configuration (Summer '25+)
 
-### Step 1: Enable External Client Apps
+#### Step 2a: Enable External Client Apps
 
 1. **Navigate to External Client Apps Settings**
    - Gear Icon in the upper right → Setup → Quick Find (search on the left) → "External Client Apps"
    - Click on "Settings" tab
    - ✅ **Enable External Client Apps** (if not already enabled)
 
-### Step 2: Create External Client App
+#### Step 2b: Create External Client App
 
 1. **Navigate to External Client Apps**
    - Setup → Quick Find → "External Client Apps Manager"
@@ -80,7 +80,7 @@ This folder contains all tools and documentation for setting up and testing Sale
 
 
 
-### Step 3: OAuth Policies (post creation)
+#### Step 2c: OAuth Policies (post creation)
 1. **OAuth Policies**
    - **Edit** button
    - **Enable Client Credentials Flow** (e.g. josh.belliveau831@agentforce.com - seen in Profile | settings, if needed)
@@ -90,7 +90,7 @@ This folder contains all tools and documentation for setting up and testing Sale
 
 
 
-### Step 4: Retrieve Credentials
+#### Step 2d: Retrieve Credentials
 
 1. **Get Client ID and Secret**
    - Click the `Settings` tab
@@ -99,13 +99,14 @@ This folder contains all tools and documentation for setting up and testing Sale
    - Copy the **Consumer Key** (Client ID) and **Consumer Secret** (Client Secret)
    - **IMPORTANT**: Store these securely as you'll need them in your .env and/or Snowflake
 
-## Environment Configuration
 
-### Step 1: Create Environment File
+## Local Environment Configuration
+
+### Create Environment File
 
 1. **Copy Template**
    ```bash
-   cp env_template.txt .env
+   cp .env_template.txt .env
    ```
 
 2. **Update .env File**
@@ -115,19 +116,27 @@ This folder contains all tools and documentation for setting up and testing Sale
    SALESFORCE_DEV_URL=https://your-domain.develop.my.salesforce.com
    ```
 
-3. **Security Note**
-   - Never commit `.env` file to version control
-   - File is already in `.gitignore`
+```markdown
+> [!WARNING]
+> **Never commit the `.env` file to version control!** This file contains sensitive credentials and should remain local. It is already included in `.gitignore` to help prevent this.
+```
 
+### Connection Testing
 
-## Connection Testing
-
-### Quick Credential Test (Fastest)
+#### Quick Credential Test (Fastest)
 
 For a **quick credential validation**, use the shell script:
 ```bash
+cd Salesforce
+
 ./Salesforce_test.sh
 ```
+**Use this script when:**
+- ✅ You want to quickly verify credentials are working
+- ✅ You've just updated your `.env` file
+- ✅ You need a fast connectivity check
+- ✅ You're troubleshooting authentication issues
+
 
 **Expected Output:**
 ```
@@ -140,98 +149,53 @@ For a **quick credential validation**, use the shell script:
 ⏱️  Test completed in under 5 seconds
 ```
 
-**Use this script when:**
-- ✅ You want to quickly verify credentials are working
-- ✅ You've just updated your `.env` file
-- ✅ You need a fast connectivity check
-- ✅ You're troubleshooting authentication issues
 
-### Comprehensive Python Test
+#### Check Contact Fields
 
-For **detailed testing and validation**, use the comprehensive Python test:
+**Check Required Fields**
 ```bash
-python test_connection.py
+python check_contact_fields.py
 ```
 
-**Expected Output:**
+
+**Expected Output** 
+
+The most important part is that the new custom field exists `patient_id__c`
 ```
-🚀 SALESFORCE CONNECTION TEST STARTING
-✅ Environment variables loaded
-✅ OAuth token retrieved successfully  
-✅ API connectivity successful
-✅ Contact object access successful
-✅ patient_id__c custom field found
-✅ Campaign object access successful
-✅ Sample data creation successful
-📊 Results: 6/6 tests passed
-🎉 ALL TESTS PASSED! Salesforce connection is ready.
-```
+=== Salesforce Contact Fields Checker ===
+Loading configuration from ../.env file...
+Checking Contact object fields...
+✅ Found 67 fields on Contact object
 
-**Use this script when:**
-- 🔧 Setting up Salesforce for the first time
-- 🔧 Validating custom field configuration
-- 🔧 Testing object permissions
-- 🔧 Debugging integration issues
+📋 REQUIRED FIELDS:
+• LastName
+• Name
 
-### Legacy Python Test (Simple)
+🔧 CUSTOM FIELDS:
+• Languages__c
+• Level__c
+• member_id__c
+• patient_id__c
 
-For a **basic Python connectivity test**:
-```bash
-python salesforce_test.py
-```
+🔍 patient_id__c Field Status:
+✅ patient_id__c field EXISTS
+   Type: double
+   Label: Patient ID
+   Required: False
+   Updateable: True
 
-**Expected Output:**
-```
-✅ Successfully connected to Salesforce
-✅ OAuth token retrieved
-✅ API test successful
-Current User: [Your Name]
-Organization: [Your Org Name]
-```
+📝 COMMON STANDARD FIELDS:
+✅ FirstName
+✅ LastName
+✅ Email
+✅ Phone
+✅ Title
+✅ Description
+✅ AccountId
 
-## Contact Management
-
-### Test Contact Creation
-
-1. **Check Required Fields**
-   ```bash
-   python check_contact_fields.py
-   ```
-
-2. **Create Test Contact**
-   ```bash
-   python create_contact.py
-   ```
-
-3. **Verify in Salesforce**
-   - Navigate to Contacts tab
-   - Click into the `Details` view
-   
-### Custom Fields
-
-The integration uses a custom field: `patient_id__c`
-
-**To create this field:**
-1. Setup → Object Manager → Contact
-2. Fields & Relationships → New
-3. Field Type: Number
-4. Field Label: Patient ID
-5. Field Name: patient_id (will become `patient_id__c`)
-6. Make field required and unique
-
-## Campaign Management
-
-### Test Campaign Management
-
-```bash
-python campaign_example.py
+=== Field Check Complete ===
 ```
 
-**Features Tested:**
-- Campaign creation
-- Contact creation with patient IDs
-- Adding contacts to campaigns
-- Batch processing
 
 ### Full Campaign Manager
 
@@ -468,6 +432,18 @@ Or view the Snowflake setup guide: `../Snowflake/README.md`
 
 ## Debugging
 
+### WIP
+#### Test Contact Creation
+
+**Create Test Contact**
+```bash
+python create_contact.py
+```
+
+**Verify in Salesforce**
+- Navigate to Contacts tab
+- Click into the `Details` view
+
 ### Common Issues and Solutions
 
 #### 🔍 **Authentication Issues**
@@ -550,6 +526,37 @@ from campaign_contact_manager import *
 2. Add traced entity (your user)
 3. Set appropriate log levels
 4. Review logs for API calls
+
+## WIP
+### Comprehensive Python Test
+
+For **detailed testing and validation**, use the comprehensive Python test:
+```bash
+python test_connection.py
+```
+
+**Expected Output:**
+```
+🚀 SALESFORCE CONNECTION TEST STARTING
+✅ Environment variables loaded
+✅ OAuth token retrieved successfully  
+✅ API connectivity successful
+✅ Contact object access successful
+✅ patient_id__c custom field found
+✅ Campaign object access successful
+✅ Sample data creation successful
+📊 Results: 6/6 tests passed
+🎉 ALL TESTS PASSED! Salesforce connection is ready.
+```
+
+**Use this script when:**
+- 🔧 Setting up Salesforce for the first time
+- 🔧 Validating custom field configuration
+- 🔧 Testing object permissions
+- 🔧 Debugging integration issues
+
+
+
 
 ### Support Resources
 
