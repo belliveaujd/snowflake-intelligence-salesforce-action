@@ -1,5 +1,25 @@
+# Virtual Environment
 .venv/
+venv/
+ENV/
+
+# Python cache
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Environment variables
 .env
-.DS_Store
+.env.*
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+*.so
+
+# IDE / Editor specific
+.vscode/
+.idea/
+*.DS_Store
