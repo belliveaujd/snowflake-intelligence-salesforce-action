@@ -3,7 +3,6 @@
 This folder contains all tools and documentation for setting up Snowflake stored procedures that integrate with Salesforce, including secure credential management and agent-compatible procedures.
 
 ## Table of Contents
-
 1. [Prerequisites](#prerequisites)
 2. [Quick Setup Overview](#quick-setup-overview)
 3. [Complete Setup Process](#complete-setup-process)
@@ -16,6 +15,7 @@ This folder contains all tools and documentation for setting up Snowflake stored
 ## Prerequisites
 
 - ✅ Snowflake account with appropriate permissions (ACCOUNTADMIN or equivalent)
+- ✅ Synthea Data in your account (and other initial setup if wanting the full demo)
 - ✅ Completed Salesforce setup (see `../Salesforce/README.md`)
 - ✅ Salesforce Consumer Key (Client ID), Consumer Secret (Client Secret), and Instance URL from your Salesforce Developer Account
 
@@ -50,7 +50,6 @@ The entire Snowflake integration can be deployed using a **single SQL file** tha
               ✅ Compatible with Snowflake Agents
 ```
 
-## Complete Setup Process
 
 ### Step 1: Update Credentials in the SQL File
 
@@ -76,7 +75,6 @@ SECRET_STRING = "https://your-instance.my.salesforce.com";  -- ← Replace this
 ### Step 2: Execute the Complete Setup
 
 1. **In Snowflake Web UI:**
-   - Navigate to **Worksheets**
    - Copy and paste the entire `00_snowflake_salesforce_e2e_setup.sql` file
    - Update the 
    - Execute the script
@@ -97,7 +95,78 @@ PATIENTS_REQUESTED: 2 | PATIENTS_SUCCESSFUL: 2 | CONTACTS_CREATED: 2 |
 SUCCESS_RATE: 100.0%
 ```
 
-**🎉 That's it! Your integration is ready for production use.**
+## Step 4: Snowflake Agent Configuration
+_NOTE: this assumes you have setup Snowflake Intelligence according to the [Snowflake Intelligence](https://docs.snowflake.com/en/user-guide/snowflake-cortex/snowflake-intelligence)_ 
+
+#### Setup Cortex Analyst & Search
+Steps take in other project... WIP on integrating docs here
+
+#### Setting Up the Procedure as a Custom Tool
+
+Once your Snowflake integration is deployed, you can configure Snowflake Agents to use the `SALESFORCE_CAMPAIGN_MANAGER` procedure as a custom tool.
+
+#### Agent Custom Tool Configuration
+
+In your Snowflake Agent setup, configure the custom tool with these parameters:
+
+- **Function Name:** `SALESFORCE_CAMPAIGN_MANAGER`
+- **Description:** _this is important for the agent's orchestration_
+
+```
+  PROCEDURE/FUNCTION DETAILS:
+- Type: Custom Python Stored Procedure
+- Language: Python 3.11
+- Signature: (CAMPAIGN_NAME VARCHAR, PATIENTS_JSON VARCHAR)
+- Returns: VARCHAR
+- Execution: CALLER with CALLED ON NULL INPUT
+- Volatility: VOLATILE
+- Primary Function: Salesforce Campaign Management and Patient Contact Integration
+- Target: Salesforce CRM campaigns and contact records
+- Error Handling: Comprehensive exception handling with detailed status reporting
+
+SAMPLE USAGE:
+CALL SALESFORCE_CAMPAIGN_MANAGER(
+    'Mixed Patient ID Test Campaign',
+    '[
+        {
+            "name": "Alex Thompson",
+            "patient_id": 300001,
+            "email": "alex.third@healthcaretest.com"
+        },
+        {
+            "name": "Charlie Wilson",
+            "patient_id": 300003,
+            "email": "charlie.wilson.pid@healthcaretest.com"
+        }
+    ]'
+);
+
+DESCRIPTION:
+This procedure automates the creation and management of Salesforce marketing campaigns by integrating patient data from Snowflake with Salesforce CRM. It accepts a campaign name and JSON array of patient records (containing name, patient_id, and email), then either finds an existing campaign or creates a new one in Salesforce. The procedure automatically creates Contact records for patients who don't exist in Salesforce (using patient_id as the unique identifier) and adds all patients as campaign members. It provides detailed execution results including success rates, contact creation counts, and failure details, making it ideal for healthcare organizations running patient outreach campaigns. The procedure requires proper Salesforce API credentials stored in Snowflake secrets and uses OAuth2 client credentials authentication for secure integration.
+
+USAGE SCENARIOS:
+- Patient Outreach Campaigns: Launch targeted marketing campaigns for specific patient populations, such as wellness reminders, appointment scheduling, or health education initiatives
+- Care Coordination: Create campaigns for care management programs, medication adherence tracking, or follow-up communications after medical procedures
+- Data Synchronization: Maintain synchronized patient contact information between Snowflake analytics databases and Salesforce CRM for comprehensive patient relationship management
+
+parameters:
+  - name: CAMPAIGN_NAME
+    type: string
+    description: Name of the Salesforce campaign
+  - name: PATIENTS_JSON  
+    type: string
+    description: JSON array string of patient objects
+```
+
+#### Connection Testing
+
+```bash
+# Test individual components
+./test_snowflake_connection.sh
+
+# Test specific SQL
+snow sql --connection demo_admin_keypair -q "SELECT CURRENT_TIMESTAMP;"
+```
 
 ## Testing and Validation
 
@@ -123,42 +192,7 @@ PATIENTS_REQUESTED: 2 | PATIENTS_SUCCESSFUL: 2 | CONTACTS_CREATED: 0 |
 SUCCESS_RATE: 100.0%
 ```
 
-### Additional Testing (Optional)
-
-If you need to run additional tests, you can use the dedicated test files:
-
-```sql
--- In Snowflake, you can also run these separate test files:
--- test_agent_compatible_procedure.sql
--- test_patient_id_lookup.sql
 ```
-
-### Manual Test Call
-
-```sql
-CALL SALESFORCE_CAMPAIGN_MANAGER(
-    'Manual Test Campaign',
-    '[
-        {
-            "name": "Test Patient",
-            "patient_id": 999001,
-            "email": "test.patient@example.com"
-        }
-    ]'
-);
-```
-
-## Snowflake Agent Configuration
-
-### Setting Up the Procedure as a Custom Tool
-
-Once your Snowflake integration is deployed, you can configure Snowflake Agents to use the `SALESFORCE_CAMPAIGN_MANAGER` procedure as a custom tool.
-
-### Step 1: Agent Custom Tool Configuration
-
-In your Snowflake Agent setup, configure the custom tool with these parameters:
-
-```yaml
 custom_tools:
   - name: "salesforce_campaign_manager"
     function_name: "SALESFORCE_CAMPAIGN_MANAGER"
@@ -234,66 +268,31 @@ CALL SALESFORCE_CAMPAIGN_MANAGER(
 ]
 ```
 
-### Agent Tool Configuration
 
-When configuring Snowflake Agents, use the following for the tool description:
-```yaml
-function_name: SALESFORCE_CAMPAIGN_MANAGER
-  - description: 
 
-  PROCEDURE/FUNCTION DETAILS:
-- Type: Custom Python Stored Procedure
-- Language: Python 3.11
-- Signature: (CAMPAIGN_NAME VARCHAR, PATIENTS_JSON VARCHAR)
-- Returns: VARCHAR
-- Execution: CALLER with CALLED ON NULL INPUT
-- Volatility: VOLATILE
-- Primary Function: Salesforce Campaign Management and Patient Contact Integration
-- Target: Salesforce CRM campaigns and contact records
-- Error Handling: Comprehensive exception handling with detailed status reporting
+### Additional Testing (Optional)
 
-SAMPLE USAGE:
+If you need to run additional tests, you can use the dedicated test files:
+
+```sql
+-- In Snowflake, you can also run these separate test files:
+-- test_agent_compatible_procedure.sql
+-- test_patient_id_lookup.sql
+```
+
+### Manual Test Call
+
+```sql
 CALL SALESFORCE_CAMPAIGN_MANAGER(
-    'Mixed Patient ID Test Campaign',
+    'Manual Test Campaign',
     '[
         {
-            "name": "Alex Thompson",
-            "patient_id": 300001,
-            "email": "alex.third@healthcaretest.com"
-        },
-        {
-            "name": "Charlie Wilson",
-            "patient_id": 300003,
-            "email": "charlie.wilson.pid@healthcaretest.com"
+            "name": "Test Patient",
+            "patient_id": 999001,
+            "email": "test.patient@example.com"
         }
     ]'
 );
-
-DESCRIPTION:
-This procedure automates the creation and management of Salesforce marketing campaigns by integrating patient data from Snowflake with Salesforce CRM. It accepts a campaign name and JSON array of patient records (containing name, patient_id, and email), then either finds an existing campaign or creates a new one in Salesforce. The procedure automatically creates Contact records for patients who don't exist in Salesforce (using patient_id as the unique identifier) and adds all patients as campaign members. It provides detailed execution results including success rates, contact creation counts, and failure details, making it ideal for healthcare organizations running patient outreach campaigns. The procedure requires proper Salesforce API credentials stored in Snowflake secrets and uses OAuth2 client credentials authentication for secure integration.
-
-USAGE SCENARIOS:
-- Patient Outreach Campaigns: Launch targeted marketing campaigns for specific patient populations, such as wellness reminders, appointment scheduling, or health education initiatives
-- Care Coordination: Create campaigns for care management programs, medication adherence tracking, or follow-up communications after medical procedures
-- Data Synchronization: Maintain synchronized patient contact information between Snowflake analytics databases and Salesforce CRM for comprehensive patient relationship management
-
-parameters:
-  - name: CAMPAIGN_NAME
-    type: string
-    description: Name of the Salesforce campaign
-  - name: PATIENTS_JSON  
-    type: string
-    description: JSON array string of patient objects
-```
-
-#### Connection Testing
-
-```bash
-# Test individual components
-./test_snowflake_connection.sh
-
-# Test specific SQL
-snow sql --connection demo_admin_keypair -q "SELECT CURRENT_TIMESTAMP;"
 ```
 
 
