@@ -1,6 +1,20 @@
 # Setup the Synthea Synthetic Dataset
 These steps will walk you through how to get an instance of the Synthea Synthentic data in your account
 
+## Table of Contents
+
+1. [Infrastructure Setup](#infrastructure-setup)
+2. [Synthea Dataset](#synthea-dataset)
+3. [Deploy Functions & Procedures](#deploy-functions--procedures)
+4. [Create Cortex Analyst](#create-cortex-analyst)
+5. [Create Cortex Search (Optional)](#create-cortex-search-optional)
+6. [Create Cortex Agent](#create-cortex-agent)
+7. [Agent: Analyst Config](#tool-cortex-analyst)
+8. [Agent: Cortex Search (optional)](#tool-cortex-search-optional)
+9. [Agent: Custom Functions (optional)](#tool-custom-functions-optional)
+10. [Agent: Custom Procedures](#tool-custom-procedures)
+11. [Test the Agent](#testing-the-agent)
+
 
 ## Infrastructure Setup
 Create the `database`, `schema`, and `warehouse` for the demo 
@@ -12,7 +26,47 @@ The Synthea dataset is required for this demonstration.  If you already have the
 - Install with the name: `SYNTHETIC_HEALTHCARE_DATA__CLINICAL_AND_CLAIMS`
 
 
-## Cortex Analyst
+## Deploy Functions & Procedures
+
+### Functions
+- Add the Custom Functions [06_custom_functions.sql](./06_custom_functions.sql)
+
+### Proc: SALESFORCE_CAMPAIGN_MANAGER
+- Deploy the [Salesforce Campaign Procedure](./20_proc__salesforce_campaign_manager.sql)
+- Test a campaign addition **_NOTE_**: Failure to add to a campaign can mean simply that the person is already in the campaign (if running for a 2nd+ time)
+
+```SQL
+CALL SALESFORCE_CAMPAIGN_MANAGER(
+    'Patient ID Test Campaign 20250930-1657',
+    '[
+        {
+            "name": "Alex Thompson",
+            "patient_id": 300001,
+            "email": "alex.thompson.pid@healthcaretest.com"
+        },
+        {
+            "name": "Beth Rodriguez",
+            "patient_id": 300002,
+            "email": "beth.rodriguez.pid@healthcaretest.com"
+        }
+    ]'
+);
+```
+
+**Success Example**:
+```
+CAMPAIGN: Patient ID Test Campaign 2024 | CAMPAIGN_STATUS: CREATED | 
+PATIENTS_REQUESTED: 2 | PATIENTS_SUCCESSFUL: 2 | CONTACTS_CREATED: 2 | 
+SUCCESS_RATE: 100.0%
+```
+
+**Success, but Members Already in Campaign**:
+```
+CAMPAIGN: Patient ID Test Campaign 20250930-1657 | CAMPAIGN_STATUS: EXISTING | PATIENTS_REQUESTED: 2 | PATIENTS_SUCCESSFUL: 0 | CONTACTS_CREATED: 0 | PATIENTS_FAILED: 2 | FAILURE_DETAILS: Alex Thompson: Failed to add to campaign; Beth Rodriguez: Failed to add to campaign | SUCCESS_RATE: 0.0%
+```
+
+
+## Create Cortex Analyst
 
 ### Semantic Model
 
@@ -49,13 +103,25 @@ LIST @HEALTHCARE_DEMO_STAGE;
 - Create New button dropdown (upload your YAML) 
 
 
-## Cortex Search
-_Optional_
+## Create Cortex Search (Optional)
 
 - [05_cortex_search_setup_fixed.sql](./05_cortex_search_setup_fixed.sql)
 
-## Cortex Agent Creation
-### Cortex Analyst
+
+## Create Cortex Agent
+_NOTE: this assumes you have setup Snowflake Intelligence according to the [Snowflake Intelligence](https://docs.snowflake.com/en/user-guide/snowflake-cortex/snowflake-intelligence)_ 
+
+- AI/ML > Agents > Create Agent
+- **Check the box**: `Create this agent for snowflake intelligence`
+- **Database and Schema**: `Snowflake_Intelligence.agents`
+- **Name**: `CUR_COC_SYNTHETIC`
+- **Display Name**: `Cost of Care (Synthea)`
+- **Description**: `Cost of Care against the Synthea Synthetic Healthcare Dataset`
+- **Sample Question 1**: `Can you show me the top 20 patients by total healthcare spending`
+- **Sample Question 2**: `Can you create a chart showing how costs are distributed? I want to see if we follow the typical 80/20 rule`
+- **Sample Question 3**: `Can you add Wendell Smith to a Salesforce Campaigned titled "High Cost Patients"?`
+
+### Tool: Cortex Analyst
 Add the Analyst
 - **Database:** `CUR_SYNTHENTIC_HEALTHCARE.DEMO_ASSETS`
 - **Stage**: `HEALTHCARE_DEMO_STAGE`
@@ -121,7 +187,7 @@ The HIGH_COST_CLAIMANTS_HEALTHCARE_ANALYTICS semantic model provides comprehensi
 - **Query Timeout:** `300`
 - **Save**
 
-### Cortex Search
+### Tool: Cortex Search (Optional)
 Add the Search
 
 - **Schema**: `CUR_SYNTHETIC_HEALTHCARE.DEMO_ASSETS`
@@ -132,74 +198,86 @@ Add the Search
 - **Name**: `SYNTHEA_COC_PATIENT_SEARCH`
 - **Description**: `Search all 1.42M patients for comprehensive healthcare analysis with full demographic and cost data across all risk levels`
 
-### Custom Functions
+### Tool: Custom Functions (Optional)
 - Add the Custom Functions [06_custom_functions.sql](./06_custom_functions.sql)
-- Deploy the Salesforce Campaign Procedure
 
+#### GENERATE_PATIENT_INSIGHTS
 
+- **NAME:** `GENERATE_PATIENT_INSIGHTS`
+- **Description**: 
+```
+PROCEDURE/FUNCTION DETAILS:
+- Type: Custom Function
+- Language: SQL
+- Signature: (PATIENT_ID NUMBER)
+- Returns: VARCHAR
+- Execution: Caller context with standard null handling
+- Volatility: Volatile (calls external AI service)
+- Primary Function: AI-powered healthcare analytics and care management recommendations
+- Target: Individual patient records in healthcare database
+- Error Handling: Relies on Snowflake Cortex error handling and data validation
 
+DESCRIPTION:
+This custom function leverages Snowflake's Cortex AI capabilities to generate personalized care management insights and cost reduction recommendations for healthcare patients. The function takes a patient ID as input, retrieves comprehensive patient data including demographics, age, and total healthcare expenses, then uses the Snowflake Arctic AI model to analyze this information and provide three specific care management recommendations. This tool is designed for healthcare administrators, care coordinators, and clinical decision-makers who need AI-powered insights to optimize patient care while reducing costs. Users should ensure they have appropriate permissions to access patient data and be aware that the function makes external calls to Snowflake's AI services, which may impact performance and incur additional costs. The function returns AI-generated text recommendations that should be reviewed by qualified healthcare professionals before implementation.
 
-
-### OLD ./Snowflake/Readme.md
-
-1. **Open `00_snowflake_salesforce_e2e_setup.sql` in Snowflake or your preferred editor**
-
-2. **Find the secrets section (lines 6-18) and update with your Salesforce credentials:**
-
-```sql
--- Update these lines with your actual Salesforce credentials
-CREATE OR REPLACE SECRET salesforce_client_id
-TYPE = GENERIC_STRING
-SECRET_STRING = "YOUR_ACTUAL_CLIENT_ID_HERE";  -- ← Replace this
-
-CREATE OR REPLACE SECRET salesforce_client_secret
-TYPE = GENERIC_STRING
-SECRET_STRING = "YOUR_ACTUAL_CLIENT_SECRET_HERE";  -- ← Replace this
-
-CREATE OR REPLACE SECRET salesforce_instance_url
-TYPE = GENERIC_STRING
-SECRET_STRING = "https://your-instance.my.salesforce.com";  -- ← Replace this
+USAGE SCENARIOS:
+- Care Management Reviews: Generate personalized care recommendations during routine patient assessments or care plan updates to identify opportunities for improved outcomes and cost savings
+- Population Health Analysis: Systematically analyze high-cost patients to develop targeted intervention strategies and resource allocation plans across healthcare populations
+- Clinical Decision Support: Provide AI-assisted insights to healthcare providers during patient consultations to supplement clinical judgment with data-driven care management suggestions
 ```
 
-### Step 2: Execute the Complete Setup
-
-1. **In Snowflake Web UI:**
-   - Copy and paste the entire `00_snowflake_salesforce_e2e_setup.sql` file
-   - Update the 
-   - Execute the script
-
-2. **The script will automatically:**
-   - ✅ Create secure credential storage (Secrets)
-   - ✅ Configure network access rules for Salesforce
-   - ✅ Deploy the `SALESFORCE_CAMPAIGN_MANAGER` procedure
-   - ✅ Run test cases to validate everything works
-
-### Step 3: Verify Installation
-
-The script includes built-in test cases at the end. You should see successful results like:
-
+#### GET_PATIENT_SUMMARY
 ```
-CAMPAIGN: Patient ID Test Campaign 2024 | CAMPAIGN_STATUS: CREATED | 
-PATIENTS_REQUESTED: 2 | PATIENTS_SUCCESSFUL: 2 | CONTACTS_CREATED: 2 | 
-SUCCESS_RATE: 100.0%
+PROCEDURE/FUNCTION DETAILS:
+- Type: Custom Function
+- Language: SQL
+- Signature: (INPUT_PATIENT_ID NUMBER)
+- Returns: VARCHAR
+- Execution: Caller context with standard null handling
+- Volatility: Stable (results consistent for same input)
+- Primary Function: Patient profile report generation
+- Target: Individual patient records and related healthcare data
+- Error Handling: Standard SQL error propagation
+
+DESCRIPTION:
+This SQL function generates a comprehensive, formatted patient profile report by retrieving and consolidating healthcare data from multiple tables including patient demographics, encounters, and conditions. The function takes a single patient ID as input and returns a structured text report containing essential patient information such as name, age, gender, location, total healthcare costs breakdown, encounter history, active conditions count, and a calculated risk level based on total healthcare expenses. This function is designed for healthcare administrators, case managers, and clinical staff who need quick access to a patient's complete healthcare summary in a readable format. The function requires read access to the SYNTHETIC_HEALTHCARE_DATA__CLINICAL_AND_CLAIMS.SILVER schema and will return null or incomplete data if the patient ID doesn't exist or if the user lacks proper permissions. The risk level calculation automatically categorizes patients into MODERATE, HIGH, CRITICAL, or MILLION+ tiers based on their total healthcare costs, making it valuable for resource allocation and care management decisions.
+
+USAGE SCENARIOS:
+- Clinical consultations where healthcare providers need a quick overview of a patient's complete healthcare profile including costs, conditions, and encounter history
+- Administrative reporting and case management workflows where staff need formatted patient summaries for insurance reviews, care coordination, or resource planning
+- Healthcare analytics and auditing processes where standardized patient profiles are needed for compliance reporting, quality assessments, or population health management
 ```
 
-## Snowflake Agent Configuration
-_NOTE: this assumes you have setup Snowflake Intelligence according to the [Snowflake Intelligence](https://docs.snowflake.com/en/user-guide/snowflake-cortex/snowflake-intelligence)_ 
 
-#### Setup Cortex Analyst & Search
-Steps take in other project... WIP on integrating docs here
+#### GET_PATIENT_CONDITIONS
+```
+PROCEDURE/FUNCTION DETAILS:
+- Type: Custom Function
+- Language: SQL
+- Signature: (PATIENT_ID NUMBER)
+- Returns: VARCHAR
+- Execution: Caller context with standard null handling
+- Volatility: Stable (results depend on current data state)
+- Primary Function: Data aggregation and concatenation
+- Target: Patient condition records in clinical database
+- Error Handling: Standard SQL exception handling
 
-#### Setting Up the Procedure as a Custom Tool
+DESCRIPTION:
+This SQL function retrieves and consolidates all medical conditions associated with a specific patient into a single, semicolon-delimited string format. The function queries the SYNTHETIC_HEALTHCARE_DATA clinical conditions table, aggregates all distinct condition descriptions for the specified patient ID, and returns them as an ordered, concatenated VARCHAR string. This is particularly useful for generating patient summary reports, creating consolidated medical histories, or preparing data for external system integrations where a compact representation of all patient conditions is required. Users should ensure they have appropriate read permissions on the underlying SILVER.CONDITIONS table and be aware that the function will return NULL if no conditions exist for the specified patient. The function is designed for read-only operations and poses no risk to data integrity, making it safe for use in reporting and analytical contexts.
 
-Once your Snowflake integration is deployed, you can configure Snowflake Agents to use the `SALESFORCE_CAMPAIGN_MANAGER` procedure as a custom tool.
+USAGE SCENARIOS:
+- Patient Summary Reports: Generate comprehensive medical condition summaries for clinical documentation, discharge summaries, or referral letters where all conditions need to be displayed in a compact format
+- Data Export Operations: Prepare patient data for external system integrations, insurance claims processing, or research databases that require condition information in a single field
+- Clinical Dashboard Development: Support real-time patient monitoring dashboards and electronic health record systems that need to display complete condition histories in limited screen space
+```
 
-#### Agent Custom Tool Configuration
 
-In your Snowflake Agent setup, configure the custom tool with these parameters:
 
+### Tool: Custom Procedures
+#### SALESFORCE_CAMPAIGN_MANAGER
 - **Function Name:** `SALESFORCE_CAMPAIGN_MANAGER`
-- **Description:** _this is important for the agent's orchestration_
+- **Description:** 
+NOTE: _this is important for the agent's orchestration_
 
 ```
   PROCEDURE/FUNCTION DETAILS:
@@ -237,7 +315,10 @@ USAGE SCENARIOS:
 - Patient Outreach Campaigns: Launch targeted marketing campaigns for specific patient populations, such as wellness reminders, appointment scheduling, or health education initiatives
 - Care Coordination: Create campaigns for care management programs, medication adherence tracking, or follow-up communications after medical procedures
 - Data Synchronization: Maintain synchronized patient contact information between Snowflake analytics databases and Salesforce CRM for comprehensive patient relationship management
+```
 
+
+``` 
 parameters:
   - name: CAMPAIGN_NAME
     type: string
@@ -247,96 +328,8 @@ parameters:
     description: JSON array string of patient objects
 ```
 
-#### Connection Testing
-
-```bash
-# Test individual components
-./test_snowflake_connection.sh
-
-# Test specific SQL
-snow sql --connection demo_admin_keypair -q "SELECT CURRENT_TIMESTAMP;"
-```
-
-## Testing and Validation
-
-### Built-in Test Cases
-
-The `00_snowflake_salesforce_e2e_setup.sql` file includes comprehensive test cases that automatically run when you execute the setup script. These tests validate:
-
-**Test Scenarios Included:**
-- ✅ **New Patient Creation** - Creates contacts with unique patient IDs
-- ✅ **Existing Patient Lookup** - Finds existing contacts by patient_id (not email)
-- ✅ **Mixed Scenarios** - Handles both new and existing patients in one campaign
-- ✅ **Campaign Management** - Creates new campaigns or reuses existing ones
-
-**Expected Test Results:**
-```
-Test 1: Creating new patients with unique patient IDs...
-CAMPAIGN: Patient ID Test Campaign 2024 | CAMPAIGN_STATUS: CREATED | 
-PATIENTS_REQUESTED: 2 | PATIENTS_SUCCESSFUL: 2 | CONTACTS_CREATED: 2 | 
-SUCCESS_RATE: 100.0%
-
-Test 2: Using same patient IDs with different emails (should find existing)...
-PATIENTS_REQUESTED: 2 | PATIENTS_SUCCESSFUL: 2 | CONTACTS_CREATED: 0 | 
-SUCCESS_RATE: 100.0%
-```
-
-```
-custom_tools:
-  - name: "salesforce_campaign_manager"
-    function_name: "SALESFORCE_CAMPAIGN_MANAGER"
-    database: "CUR_SYNTHETIC_HEALTHCARE"
-    schema: "DEMO_ASSETS"
-    description: "Create Salesforce campaigns and add patient contacts automatically"
-    parameters:
-      - name: "campaign_name"
-        type: "string"
-        description: "Name of the Salesforce campaign to create or use"
-        required: true
-      - name: "patients_json"
-        type: "string" 
-        description: "JSON string array of patient objects with name, patient_id, and email"
-        required: true
-```
-
-### Step 2: JSON Format for Patient Data
-
-When the agent calls this tool, the `patients_json` parameter should be a JSON string in this format:
-
-```json
-"[
-  {
-    \"name\": \"John Doe\",
-    \"patient_id\": 123456,
-    \"email\": \"john.doe@healthcare.com\"
-  },
-  {
-    \"name\": \"Jane Smith\", 
-    \"patient_id\": 123457,
-    \"email\": \"jane.smith@healthcare.com\"
-  }
-]"
-```
-
-### Step 3: Agent Usage Example
-
-Your agent can now use natural language to invoke the tool:
-
-**User:** *"Create a campaign called 'Diabetes Screening 2024' and add these patients: John Doe (ID: 300001, email: john@test.com) and Mary Johnson (ID: 300002, email: mary@test.com)"*
-
-**Agent Response:** *"I'll create the Diabetes Screening 2024 campaign and add those patients to Salesforce."*
-
-The agent will automatically format the request and call:
-```sql
-CALL SALESFORCE_CAMPAIGN_MANAGER(
-  'Diabetes Screening 2024', 
-  '[{"name":"John Doe","patient_id":300001,"email":"john@test.com"},{"name":"Mary Johnson","patient_id":300002,"email":"mary@test.com"}]'
-)
-```
-
-## Agent Compatibility Notes
-
-### Key Difference: Parameter Types
+##### Agent Compatibility Notes
+Parameter types currently have a limit.  One cannot use Array or Object types with the Cortex Agents API, hence the JSON string as a paramter for this demo.
 
 | **Feature** | **Agent-Compatible** | **Array-Based** |
 |-------------|---------------------|------------------|
@@ -345,134 +338,38 @@ CALL SALESFORCE_CAMPAIGN_MANAGER(
 | **Input Format** | JSON string | Snowflake ARRAY |
 | **Functionality** | Identical | Identical |
 
-### JSON Format for Agent-Compatible Procedure
 
-```json
-[
-    {
-        "name": "Patient Full Name",
-        "patient_id": 123456,
-        "email": "patient@email.com"
-    }
-]
+
+
+
+
+### Testing the Agent
+Your agent can now use natural language to invoke the tool:
+
+**User:** 
+```
+please add this member to a new campaign titled 'Test Thurs Night 2' Refugio Olson (Patient ID: 1992826)
 ```
 
-
-
-### Additional Testing (Optional)
-
-If you need to run additional tests, you can use the dedicated test files:
-
-```sql
--- In Snowflake, you can also run these separate test files:
--- test_agent_compatible_procedure.sql
--- test_patient_id_lookup.sql
+**Agent Response:** 
+```
+I'd be happy to add Refugio Olson to the new Salesforce campaign 'Test Thurs Night 2'. However, I need his email address to create the campaign, as the Salesforce integration requires an email for each patient contact.  Could you please provide Refugio Olson's email address so I can proceed with adding him to the campaign?.
 ```
 
-### Manual Test Call
+You can enter any test email you would like
 
-```sql
-CALL SALESFORCE_CAMPAIGN_MANAGER(
-    'Manual Test Campaign',
-    '[
-        {
-            "name": "Test Patient",
-            "patient_id": 999001,
-            "email": "test.patient@example.com"
-        }
-    ]'
-);
+**Agent Final Response**: 
 ```
+Perfect! I've successfully added Refugio Olson to the new Salesforce campaign "Test Thurs Night 2".
 
+Campaign Summary:
 
-### Support Resources
+Campaign Name: Test Thurs Night 2
+Campaign Status: Created
+Patients Requested: 1
+Patients Successfully Added: 1
+New Contacts Created: 0 (contact already existed)
+Success Rate: 100%
+Refugio Olson (Patient ID: 1992826) with email testrefugio@test.com has been successfully added as a campaign member to the new campaign.
 
-- [Snowflake External Functions Documentation](https://docs.snowflake.com/en/sql-reference/external-functions)
-- [Snowflake Secrets Management](https://docs.snowflake.com/en/sql-reference/sql/create-secret)
-- [Python UDFs in Snowflake](https://docs.snowflake.com/en/developer-guide/udf/python/udf-python)
-
----
-
-## 📂 File Directory & Setup Options
-
-### 🎯 Primary Setup Method (Recommended)
-
-#### **Single File Setup - `00_snowflake_salesforce_e2e_setup.sql`**
-```sql
--- Simply run this file in Snowflake Web UI
--- Everything is included: secrets, network rules, procedure, and tests
 ```
-*The `00_` prefix indicates this is the complete end-to-end setup that includes all components.*
-
-### 🔧 Alternative: Step-by-Step Setup (Advanced Users)
-
-For users who prefer granular control, you can use the individual numbered files:
-
-```sql
--- Step 1: Create secrets only
--- 01_snowflake_secrets_setup.sql
-
--- Step 2: Deploy procedure only  
--- 02_deploy_agent_procedure.sql
-```
-
-### 📁 Complete File Directory
-
-| **File** | **Purpose** | **When to Use** |
-|----------|-------------|-----------------|
-| **🎯 Primary Setup** | | |
-| `00_snowflake_salesforce_e2e_setup.sql` | **Complete end-to-end setup** - Secrets + Network + Procedure + Tests | **Use this for setup** ⭐ |
-| **🔧 Advanced Options** | | |
-| `01_snowflake_secrets_setup.sql` | **Step 1: Secrets only** - Create Snowflake secrets for credentials | Advanced users only |
-| `02_deploy_agent_procedure.sql` | **Step 2: Procedure only** - Deploy SALESFORCE_CAMPAIGN_MANAGER | Advanced users only |
-| **Testing Scripts** | | |
-| `test_basic_connection.sh` | **Quick Snowflake CLI connectivity test** | `./test_basic_connection.sh` |
-| `test_snowflake_connection.sh` | **Complete setup and integration validation** | `./test_snowflake_connection.sh` |
-| `test_agent_compatible_procedure.sql` | End-to-end procedure test | Run to test |
-| `test_patient_id_lookup.sql` | Test patient_id uniqueness behavior | Run to test |
-| **Documentation** | | |
-| `README.md` | Complete Snowflake setup guide | Reference |
-| `Snowflake_Salesforce_Integration_Summary.md` | **Complete integration overview** | Reference |
-
-## 🧪 Final Integration Validation
-
-### ✅ Automatic Validation (Built-in)
-
-The `00_snowflake_salesforce_e2e_setup.sql` file includes **automatic validation** at the end of execution:
-
-**What's Automatically Validated:**
-- ✅ Secrets creation and access
-- ✅ External access integration setup
-- ✅ Network rules configuration  
-- ✅ Procedure deployment success
-- ✅ End-to-end Salesforce connectivity
-- ✅ Campaign and contact creation workflow
-
-**Success Indicators to Look For:**
-```sql
--- At the end of your script execution, you should see:
-
-✅ SHOW SECRETS; -- Should list your 3 Salesforce secrets
-✅ SHOW INTEGRATIONS; -- Should show SALESFORCE_SYNTHEA_INTEGRATION_JDB
-
--- Test results should show:
-CAMPAIGN: Patient ID Test Campaign 2024 | CAMPAIGN_STATUS: CREATED | 
-PATIENTS_REQUESTED: 2 | PATIENTS_SUCCESSFUL: 2 | CONTACTS_CREATED: 2 | 
-SUCCESS_RATE: 100.0%
-```
-
-### 🔧 Optional CLI Validation
-
-For advanced users who want additional CLI-based validation:
-
-```bash
-# Optional: Test CLI connectivity and environment
-./test_snowflake_connection.sh
-```
-
-## Next Steps
-
-1. ✅ **Verify test results** show 100% success rates
-2. 🎯 **Configure Snowflake Agents** with the custom tool (see [Agent Configuration](#snowflake-agent-configuration))
-
-**🚀 Your integration is ready for production use with Snowflake Agents!**

@@ -34,7 +34,7 @@ This folder contains all tools and documentation for setting up Snowflake stored
 ## Salesforce Integration Setup
 This section will walk through the `Secrets Creation`, `Network Rules`, and `External Network Integration` setup. 
 
-- Step through [01_snowflake_secrets_setup.sql](./01_snowflake_secrets_setup.sql) in preferred editor.
+- Step through [01_salesforce_integration_setup.sql](./01_salesforce_integration_setup.sql) in preferred editor.
 
 ## Procedure Deployment
 Select the demo data that you wish to deploy into and follow the steps in that Readme.md file
