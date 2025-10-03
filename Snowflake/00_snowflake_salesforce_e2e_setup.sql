@@ -45,17 +45,6 @@ VALUE_LIST = (
     '*.my.salesforce.com:443'
 );
 
-/*
-ALTER NETWORK RULE salesforce_network_rule
-SET VALUE_LIST = (
-    '*.salesforce.com:443', 
-    '*.force.com:443', 
-    'login.salesforce.com:443',
-    '*.develop.my.salesforce.com:443',
-    '*.my.salesforce.com:443'
-);
-*/
-
 -- Create external access integration
 CREATE OR REPLACE EXTERNAL ACCESS INTEGRATION salesforce_synthea_integration_jdb
 ALLOWED_NETWORK_RULES = (salesforce_network_rule)

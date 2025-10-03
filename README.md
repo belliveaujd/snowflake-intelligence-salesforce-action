@@ -5,6 +5,7 @@ A comprehensive integration solution that enables **Snowflake Agents to manage S
 ## Table of Contents
 1. [Project Overview](#-project-overview)
 2. [Architecture](#️-architecture)
+3. [Data Setup](./README.md)
 3. [Quick Start: Salesforce](#step-1-salesforce-setup-required-first)
 4. [Quick Start: Snowflake](#step-2-snowflake-integration)
 
@@ -43,52 +44,5 @@ This project provides demo-ready tools to:
 
 - After completing Salesforce setup: [Snowflake Setup](./Snowflake/README.md)
 
-### Step 3: Configure Snowflake Agents
-
-1. **Configure Snowflake Agents** to use the `SALESFORCE_CAMPAIGN_MANAGER` procedure
-
 
 **Ready to get started? Begin with the [Salesforce Setup Guide](Salesforce/README.md)! 🚀**
-
-
-## 🚨 Important Notes
-
-### ⚠️ **Setup Order Matters**
-1. **Salesforce MUST be completed first** - Snowflake needs Salesforce credentials
-2. **Test each step** before proceeding to the next
-3. **Keep credentials secure** - use the provided secure storage methods
-
-### 🔐 **Security Best Practices**
-- ✅ Use Snowflake Secrets for credential storage
-- ✅ Never commit `.env` files to version control
-- ✅ Use minimal required OAuth scopes
-- ✅ Regularly rotate credentials
-- ✅ Monitor access logs
-
-### 🏥 **Healthcare Considerations**
-- Patient ID is used as the primary identifier (not email)
-- Contacts are deduplicated by patient_id to prevent duplicates
-
-
-## 🐛 Troubleshooting
-
-### Quick Diagnostic Commands
-
-```bash
-# Quick Salesforce credential test (fastest)
-cd Salesforce && ./Salesforce_test.sh
-
-# Comprehensive Salesforce validation
-cd Salesforce && python test_connection.py
-
-# Test complete Snowflake setup and connectivity
-cd Snowflake && ./test_snowflake_connection.sh
-```
-
-## 🤝 Support
-
-### Resources
-- [Salesforce Developer Documentation](https://developer.salesforce.com/docs)
-- [Snowflake Documentation](https://docs.snowflake.com)
-- [OAuth 2.0 Client Credentials Flow Guide](https://help.salesforce.com/s/articleView?id=sf.remoteaccess_oauth_client_credentials_flow.htm)
-

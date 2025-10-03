@@ -1,0 +1,1002 @@
+name: HIGH_COST_CLAIMANTS_HEALTHCARE_ANALYTICS
+description: This semantic view supports high-cost claimant analysis using synthetic healthcare data with focus on proactive care management, cost prediction, and intervention planning. Base tables reference the shared SYNTHETIC_HEALTHCARE_DATA__CLINICAL_AND_CLAIMS database while new objects are created in CUR_SYNTHETIC_HEALTHCARE.
+tables:
+  - name: PATIENTS
+    synonyms:
+      - patients
+      - members
+      - enrollees
+      - individuals
+      - participants
+      - beneficiaries
+      - subscribers
+    description: Core patient demographics and lifetime healthcare cost information, essential for identifying high-cost claimants and understanding cost drivers across patient populations.
+    base_table:
+      database: SYNTHETIC_HEALTHCARE_DATA__CLINICAL_AND_CLAIMS
+      schema: SILVER
+      table: PATIENTS
+    dimensions:
+      - name: PATIENT_ID
+        synonyms:
+          - patient_number
+          - member_id
+          - person_id
+          - individual_id
+          - subject_id
+          - unique_patient_identifier
+          - medical_record_number
+        description: Unique identifier assigned to each patient in the healthcare system.
+        expr: PATIENT_ID
+        data_type: NUMBER(38,0)
+      - name: FIRST
+        synonyms:
+          - first_name
+          - given_name
+        description: Patient's first name.
+        expr: FIRST
+        data_type: VARCHAR(16777216)
+      - name: LAST
+        synonyms:
+          - last_name
+          - surname
+          - family_name
+        description: Patient's last name.
+        expr: LAST
+        data_type: VARCHAR(16777216)
+      - name: GENDER
+        synonyms:
+          - sex
+          - gender_identity
+        description: Patient's gender (M for male, F for female).
+        expr: GENDER
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - M
+          - F
+      - name: RACE
+        synonyms:
+          - ethnicity
+          - racial_group
+          - demographic_group
+        description: Patient's racial/ethnic background.
+        expr: RACE
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - white
+          - black
+          - asian
+          - hispanic
+      - name: CITY
+        synonyms:
+          - town
+          - municipality
+          - location
+        description: City where the patient resides.
+        expr: CITY
+        data_type: VARCHAR(16777216)
+      - name: STATE
+        synonyms:
+          - province
+          - region
+          - territory
+        description: State where the patient resides.
+        expr: STATE
+        data_type: VARCHAR(16777216)
+      - name: MARITAL
+        synonyms:
+          - marital_status
+          - marriage_status
+        description: Patient's marital status.
+        expr: MARITAL
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - M
+          - S
+      - name: INCOME
+        synonyms:
+          - annual_income
+          - yearly_earnings
+          - household_income
+        description: Annual income for the patient.
+        expr: INCOME
+        data_type: NUMBER(38,0)
+    time_dimensions:
+      - name: BIRTHDATE
+        synonyms:
+          - date_of_birth
+          - birth_date
+          - dob
+          - birthday
+        description: Date of birth of the patient.
+        expr: BIRTHDATE
+        data_type: DATE
+      - name: DEATHDATE
+        synonyms:
+          - date_of_death
+          - death_date
+          - deceased_date
+        description: Date of death for the patient, if applicable.
+        expr: DEATHDATE
+        data_type: DATE
+    facts:
+      - name: HEALTHCARE_EXPENSES
+        synonyms:
+          - total_patient_costs
+          - patient_out_of_pocket
+          - patient_expenses
+          - lifetime_patient_costs
+          - total_patient_spending
+        description: Total lifetime healthcare expenses paid by the patient (out-of-pocket costs).
+        expr: HEALTHCARE_EXPENSES
+        data_type: NUMBER(38,2)
+        access_modifier: public_access
+      - name: HEALTHCARE_COVERAGE
+        synonyms:
+          - insurance_covered_amount
+          - payer_covered_costs
+          - insurance_payments
+          - total_coverage
+          - lifetime_coverage
+        description: Total lifetime healthcare expenses covered by insurance/payers.
+        expr: HEALTHCARE_COVERAGE
+        data_type: NUMBER(38,2)
+        access_modifier: public_access
+    primary_key:
+      columns:
+        - PATIENT_ID
+
+  - name: CLAIMS
+    synonyms:
+      - medical_claims
+      - insurance_claims
+      - healthcare_claims
+      - billing_claims
+      - patient_claims
+    description: Healthcare claims data including patient and provider details, diagnosis codes, service dates, and billing information essential for high-cost claimant analysis.
+    base_table:
+      database: SYNTHETIC_HEALTHCARE_DATA__CLINICAL_AND_CLAIMS
+      schema: SILVER
+      table: CLAIMS
+    dimensions:
+      - name: CLAIM_ID
+        synonyms:
+          - claim_number
+          - claim_identifier
+          - claim_reference
+          - invoice_id
+        description: Unique identifier for each healthcare claim.
+        expr: CLAIM_ID
+        data_type: NUMBER(38,0)
+      - name: PATIENT_ID
+        synonyms:
+          - patient_number
+          - member_id
+          - person_id
+        description: Unique identifier for the patient associated with the claim.
+        expr: PATIENT_ID
+        data_type: NUMBER(38,0)
+      - name: PROVIDER_ID
+        synonyms:
+          - healthcare_provider_id
+          - doctor_id
+          - practitioner_id
+        description: Unique identifier for the healthcare provider who submitted the claim.
+        expr: PROVIDER_ID
+        data_type: NUMBER(38,0)
+      - name: ENCOUNTER_ID
+        synonyms:
+          - visit_id
+          - patient_visit_id
+          - encounter_number
+        description: Unique identifier for the patient encounter associated with this claim.
+        expr: ENCOUNTER_ID
+        data_type: NUMBER(38,0)
+      - name: PRIMARY_PATIENT_INSURANCE_ID
+        synonyms:
+          - primary_insurance_id
+          - primary_payer_id
+          - main_insurance
+        description: Primary insurance provider for the patient.
+        expr: PRIMARY_PATIENT_INSURANCE_ID
+        data_type: NUMBER(38,0)
+      - name: SECONDARY_PATIENT_INSURANCE_ID
+        synonyms:
+          - secondary_insurance_id
+          - secondary_payer_id
+          - supplemental_insurance
+        description: Secondary insurance provider for the patient.
+        expr: SECONDARY_PATIENT_INSURANCE_ID
+        data_type: NUMBER(38,0)
+      - name: DIAGNOSIS1
+        synonyms:
+          - primary_diagnosis
+          - main_diagnosis
+          - principal_diagnosis
+        description: Primary diagnosis code for the patient's condition (SNOMED-CT).
+        expr: DIAGNOSIS1
+        data_type: NUMBER(38,0)
+      - name: DIAGNOSIS2
+        synonyms:
+          - secondary_diagnosis
+          - additional_diagnosis
+        description: Secondary diagnosis code for the patient's condition.
+        expr: DIAGNOSIS2
+        data_type: NUMBER(38,0)
+      - name: STATUS1
+        synonyms:
+          - claim_status
+          - primary_status
+          - billing_status
+        description: Current status of the claim (BILLED, CLOSED, etc.).
+        expr: STATUS1
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - BILLED
+          - CLOSED
+    time_dimensions:
+      - name: SERVICEDATE
+        synonyms:
+          - service_date
+          - date_of_service
+          - treatment_date
+        description: Date when the medical service was provided.
+        expr: SERVICEDATE
+        data_type: TIMESTAMP_NTZ(9)
+    facts:
+      - name: OUTSTANDING1
+        synonyms:
+          - outstanding_amount
+          - balance_due
+          - unpaid_amount
+        description: Outstanding amount for the primary claim.
+        expr: OUTSTANDING1
+        data_type: NUMBER(38,2)
+        access_modifier: public_access
+      - name: OUTSTANDING_2
+        synonyms:
+          - secondary_outstanding
+          - secondary_balance
+        description: Outstanding amount for secondary coverage.
+        expr: OUTSTANDING2
+        data_type: NUMBER(38,2)
+        access_modifier: public_access
+    primary_key:
+      columns:
+        - CLAIM_ID
+
+  - name: CLAIMS_TX
+    synonyms:
+      - claims_transactions
+      - claim_payments
+      - billing_transactions
+      - financial_transactions
+    description: Detailed financial transactions for claims including payments, adjustments, and transfers - crucial for understanding actual costs and financial flows.
+    base_table:
+      database: SYNTHETIC_HEALTHCARE_DATA__CLINICAL_AND_CLAIMS
+      schema: SILVER
+      table: CLAIMS_TX
+    dimensions:
+      - name: CLAIMS_TX_ID
+        synonyms:
+          - transaction_id
+          - payment_id
+          - financial_record_id
+        description: Unique identifier for each claims transaction.
+        expr: CLAIMS_TX_ID
+        data_type: NUMBER(38,0)
+      - name: CLAIM_ID
+        synonyms:
+          - claim_number
+          - parent_claim_id
+        description: Associated claim identifier for this transaction.
+        expr: CLAIM_ID
+        data_type: NUMBER(38,0)
+      - name: PATIENT_ID
+        synonyms:
+          - patient_number
+          - member_id
+        description: Patient associated with this transaction.
+        expr: PATIENT_ID
+        data_type: NUMBER(38,0)
+      - name: PROVIDER_ID
+        synonyms:
+          - healthcare_provider_id
+          - billing_provider_id
+        description: Healthcare provider associated with this transaction.
+        expr: PROVIDER_ID
+        data_type: NUMBER(38,0)
+      - name: TYPE
+        synonyms:
+          - transaction_type
+          - payment_type
+          - billing_type
+        description: Type of transaction (PAYMENT, CHARGE, TRANSFERIN).
+        expr: TYPE
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - PAYMENT
+          - CHARGE
+          - TRANSFERIN
+      - name: METHOD
+        synonyms:
+          - payment_method
+          - transaction_method
+        description: Method of payment (CASH, CHECK).
+        expr: METHOD
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - CASH
+          - CHECK
+      - name: PROCEDURECODE
+        synonyms:
+          - procedure_code
+          - service_code
+          - treatment_code
+        description: Medical procedure code for the service provided.
+        expr: PROCEDURECODE
+        data_type: NUMBER(38,0)
+    time_dimensions:
+      - name: FROMDATE
+        synonyms:
+          - transaction_date
+          - payment_date
+          - billing_date
+        description: Date and time when the transaction occurred.
+        expr: FROMDATE
+        data_type: TIMESTAMP_NTZ(9)
+    facts:
+      - name: AMOUNT
+        synonyms:
+          - transaction_amount
+          - payment_amount
+          - billing_amount
+        description: Total amount of the transaction.
+        expr: AMOUNT
+        data_type: NUMBER(38,2)
+        access_modifier: public_access
+      - name: PAYMENTS
+        synonyms:
+          - payment_total
+          - amount_paid
+        description: Total payment amount in the transaction.
+        expr: PAYMENTS
+        data_type: NUMBER(38,2)
+        access_modifier: public_access
+      - name: ADJUSTMENTS
+        synonyms:
+          - billing_adjustments
+          - claim_adjustments
+        description: Adjustments made to the original claim amount.
+        expr: ADJUSTMENTS
+        data_type: NUMBER(38,0)
+        access_modifier: public_access
+      - name: OUTSTANDING
+        synonyms:
+          - remaining_balance
+          - unpaid_balance
+        description: Outstanding balance after this transaction.
+        expr: OUTSTANDING
+        data_type: NUMBER(38,2)
+        access_modifier: public_access
+      - name: UNITAMOUNT
+        synonyms:
+          - unit_cost
+          - cost_per_unit
+        description: Cost per unit of service.
+        expr: UNITAMOUNT
+        data_type: NUMBER(38,2)
+        access_modifier: public_access
+      - name: UNITS
+        synonyms:
+          - quantity
+          - unit_count
+        description: Number of units billed.
+        expr: UNITS
+        data_type: NUMBER(38,0)
+        access_modifier: public_access
+    primary_key:
+      columns:
+        - CLAIMS_TX_ID
+
+  - name: ENCOUNTERS
+    synonyms:
+      - patient_visits
+      - medical_encounters
+      - healthcare_visits
+      - patient_appointments
+      - clinical_encounters
+    description: Patient encounter data including visit details, costs, and outcomes - essential for understanding healthcare utilization patterns and costs.
+    base_table:
+      database: SYNTHETIC_HEALTHCARE_DATA__CLINICAL_AND_CLAIMS
+      schema: SILVER
+      table: ENCOUNTERS
+    dimensions:
+      - name: ENCOUNTER_ID
+        synonyms:
+          - visit_id
+          - encounter_number
+          - appointment_id
+        description: Unique identifier for each patient encounter.
+        expr: ENCOUNTER_ID
+        data_type: NUMBER(38,0)
+      - name: PATIENT_ID
+        synonyms:
+          - patient_number
+          - member_id
+        description: Patient associated with this encounter.
+        expr: PATIENT_ID
+        data_type: NUMBER(38,0)
+      - name: PROVIDER_ID
+        synonyms:
+          - healthcare_provider_id
+          - attending_provider_id
+        description: Healthcare provider who conducted the encounter.
+        expr: PROVIDER_ID
+        data_type: NUMBER(38,0)
+      - name: PAYER_ID
+        synonyms:
+          - insurance_id
+          - payer_identifier
+        description: Insurance payer for this encounter.
+        expr: PAYER_ID
+        data_type: NUMBER(38,0)
+      - name: ENCOUNTERCLASS
+        synonyms:
+          - encounter_type
+          - visit_type
+          - care_setting
+        description: Type of encounter (wellness, inpatient, outpatient, etc.).
+        expr: ENCOUNTERCLASS
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - wellness
+          - inpatient
+          - outpatient
+          - emergency
+      - name: CODE
+        synonyms:
+          - encounter_code
+          - visit_code
+        description: Standardized code for the type of encounter.
+        expr: CODE
+        data_type: NUMBER(38,0)
+      - name: DESCRIPTION
+        synonyms:
+          - encounter_description
+          - visit_reason
+        description: Description of the encounter reason.
+        expr: DESCRIPTION
+        data_type: VARCHAR(16777216)
+      - name: REASONCODE
+        synonyms:
+          - reason_code
+          - diagnosis_code
+        description: Medical reason code for the encounter.
+        expr: REASONCODE
+        data_type: NUMBER(38,0)
+      - name: REASONDESCRIPTION
+        synonyms:
+          - reason_description
+          - diagnosis_description
+        description: Description of the medical reason for the encounter.
+        expr: REASONDESCRIPTION
+        data_type: VARCHAR(16777216)
+    time_dimensions:
+      - name: ENCOUNTER_START
+        synonyms:
+          - visit_start_date
+          - encounter_begin
+          - admission_date
+        description: Date and time when the encounter started.
+        expr: ENCOUNTER_START
+        data_type: TIMESTAMP_NTZ(9)
+      - name: ENCOUNTER_STOP
+        synonyms:
+          - visit_end_date
+          - encounter_end
+          - discharge_date
+        description: Date and time when the encounter ended.
+        expr: ENCOUNTER_STOP
+        data_type: TIMESTAMP_NTZ(9)
+    facts:
+      - name: BASE_ENCOUNTER_COST
+        synonyms:
+          - base_cost
+          - standard_cost
+          - encounter_fee
+        description: Base cost of the encounter before adjustments.
+        expr: BASE_ENCOUNTER_COST
+        data_type: NUMBER(38,2)
+        access_modifier: public_access
+      - name: TOTAL_CLAIM_COST
+        synonyms:
+          - total_encounter_cost
+          - total_visit_cost
+          - encounter_total
+        description: Total cost of all claims associated with this encounter.
+        expr: TOTAL_CLAIM_COST
+        data_type: NUMBER(38,2)
+        access_modifier: public_access
+      - name: PAYER_COVERAGE
+        synonyms:
+          - insurance_coverage
+          - payer_payment
+          - covered_amount
+        description: Amount covered by the insurance payer.
+        expr: PAYER_COVERAGE
+        data_type: NUMBER(38,2)
+        access_modifier: public_access
+    primary_key:
+      columns:
+        - ENCOUNTER_ID
+
+  - name: CONDITIONS
+    synonyms:
+      - medical_conditions
+      - diagnoses
+      - health_conditions
+      - patient_conditions
+      - clinical_conditions
+    description: Patient medical conditions and diagnoses - critical for understanding cost drivers and identifying high-risk patients for proactive care management.
+    base_table:
+      database: SYNTHETIC_HEALTHCARE_DATA__CLINICAL_AND_CLAIMS
+      schema: SILVER
+      table: CONDITIONS
+    dimensions:
+      - name: CONDITION_ID
+        synonyms:
+          - diagnosis_id
+          - condition_identifier
+        description: Unique identifier for each condition record.
+        expr: CONDITION_ID
+        data_type: NUMBER(38,0)
+      - name: PATIENT_ID
+        synonyms:
+          - patient_number
+          - member_id
+        description: Patient who has this condition.
+        expr: PATIENT_ID
+        data_type: NUMBER(38,0)
+      - name: ENCOUNTER_ID
+        synonyms:
+          - visit_id
+          - diagnosis_encounter
+        description: Encounter during which this condition was diagnosed.
+        expr: ENCOUNTER_ID
+        data_type: NUMBER(38,0)
+      - name: CODE
+        synonyms:
+          - condition_code
+          - diagnosis_code
+          - medical_code
+        description: Standardized medical code for the condition (SNOMED-CT).
+        expr: CODE
+        data_type: NUMBER(38,0)
+      - name: DESCRIPTION
+        synonyms:
+          - condition_name
+          - diagnosis_description
+          - condition_details
+        description: Human-readable description of the medical condition.
+        expr: DESCRIPTION
+        data_type: VARCHAR(16777216)
+      - name: SYSTEM
+        synonyms:
+          - coding_system
+          - terminology_system
+        description: Medical coding system used (SNOMED-CT, ICD, etc.).
+        expr: SYSTEM
+        data_type: VARCHAR(16777216)
+    time_dimensions:
+      - name: CONDITION_START
+        synonyms:
+          - diagnosis_date
+          - condition_onset
+          - start_date
+        description: Date when the condition was first diagnosed or started.
+        expr: CONDITION_START
+        data_type: DATE
+      - name: CONDITION_STOP
+        synonyms:
+          - condition_end
+          - resolution_date
+          - stop_date
+        description: Date when the condition was resolved (if applicable).
+        expr: CONDITION_STOP
+        data_type: DATE
+    primary_key:
+      columns:
+        - CONDITION_ID
+
+  - name: PAYERS
+    synonyms:
+      - insurance_companies
+      - health_plans
+      - insurers
+      - coverage_providers
+      - health_insurers
+    description: Insurance payer information including coverage amounts and financial performance - essential for understanding payer mix and reimbursement patterns.
+    base_table:
+      database: SYNTHETIC_HEALTHCARE_DATA__CLINICAL_AND_CLAIMS
+      schema: SILVER
+      table: PAYERS
+    dimensions:
+      - name: PAYER_ID
+        synonyms:
+          - insurance_id
+          - payer_identifier
+          - health_plan_id
+        description: Unique identifier for each insurance payer.
+        expr: PAYER_ID
+        data_type: NUMBER(38,0)
+      - name: NAME
+        synonyms:
+          - payer_name
+          - insurance_name
+          - health_plan_name
+        description: Name of the insurance payer/health plan.
+        expr: NAME
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - Medicare
+          - Medicaid
+          - Blue Cross Blue Shield
+      - name: CITY
+        synonyms:
+          - headquarters_city
+          - payer_city
+        description: City where the payer is headquartered.
+        expr: CITY
+        data_type: VARCHAR(16777216)
+      - name: STATE_HEADQUARTERED
+        synonyms:
+          - headquarters_state
+          - payer_state
+        description: State where the payer is headquartered.
+        expr: STATE_HEADQUARTERED
+        data_type: VARCHAR(16777216)
+    facts:
+      - name: AMOUNT_COVERED
+        synonyms:
+          - total_covered_amount
+          - covered_expenses
+          - insurance_payments
+        description: Total amount covered by this payer for all claims.
+        expr: AMOUNT_COVERED
+        data_type: NUMBER(38,2)
+        access_modifier: public_access
+      - name: AMOUNT_UNCOVERED
+        synonyms:
+          - uncovered_expenses
+          - out_of_pocket_costs
+          - denied_claims
+        description: Total amount not covered by this payer.
+        expr: AMOUNT_UNCOVERED
+        data_type: NUMBER(38,2)
+        access_modifier: public_access
+      - name: REVENUE
+        synonyms:
+          - payer_revenue
+          - premium_revenue
+          - total_income
+        description: Total revenue for the payer.
+        expr: REVENUE
+        data_type: NUMBER(38,2)
+        access_modifier: public_access
+      - name: MEMBER_MONTHS
+        synonyms:
+          - enrollment_months
+          - member_duration
+        description: Total member months for this payer.
+        expr: MEMBER_MONTHS
+        data_type: NUMBER(38,0)
+        access_modifier: public_access
+    primary_key:
+      columns:
+        - PAYER_ID
+
+  - name: PROVIDERS
+    synonyms:
+      - healthcare_providers
+      - doctors
+      - physicians
+      - practitioners
+      - clinicians
+      - medical_providers
+    description: Healthcare provider information including specialties and performance metrics - important for understanding provider cost patterns and quality.
+    base_table:
+      database: SYNTHETIC_HEALTHCARE_DATA__CLINICAL_AND_CLAIMS
+      schema: SILVER
+      table: PROVIDERS
+    dimensions:
+      - name: PROVIDER_ID
+        synonyms:
+          - doctor_id
+          - physician_id
+          - practitioner_id
+        description: Unique identifier for each healthcare provider.
+        expr: PROVIDER_ID
+        data_type: NUMBER(38,0)
+      - name: NAME
+        synonyms:
+          - provider_name
+          - doctor_name
+          - physician_name
+        description: Full name of the healthcare provider.
+        expr: NAME
+        data_type: VARCHAR(16777216)
+      - name: SPECIALITY
+        synonyms:
+          - medical_specialty
+          - practice_area
+          - field_of_medicine
+        description: Medical specialty of the provider.
+        expr: SPECIALITY
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - GENERAL PRACTICE
+          - CARDIOLOGY
+          - ONCOLOGY
+      - name: CITY
+        synonyms:
+          - practice_city
+          - provider_city
+        description: City where the provider practices.
+        expr: CITY
+        data_type: VARCHAR(16777216)
+      - name: STATE
+        synonyms:
+          - practice_state
+          - provider_state
+        description: State where the provider practices.
+        expr: STATE
+        data_type: VARCHAR(16777216)
+      - name: ORGANIZATION_ID
+        synonyms:
+          - hospital_id
+          - practice_id
+          - facility_id
+        description: Organization or facility the provider is affiliated with.
+        expr: ORGANIZATION_ID
+        data_type: NUMBER(38,0)
+    facts:
+      - name: ENCOUNTERS
+        synonyms:
+          - patient_visits
+          - total_encounters
+          - visit_count
+        description: Total number of patient encounters for this provider.
+        expr: ENCOUNTERS
+        data_type: NUMBER(38,0)
+        access_modifier: public_access
+      - name: PROCEDURES
+        synonyms:
+          - total_procedures
+          - procedure_count
+          - treatments_performed
+        description: Total number of procedures performed by this provider.
+        expr: PROCEDURES
+        data_type: NUMBER(38,0)
+        access_modifier: public_access
+    primary_key:
+      columns:
+        - PROVIDER_ID
+
+  - name: CARE_PLANS
+    synonyms:
+      - treatment_plans
+      - care_programs
+      - patient_care_plans
+      - medical_plans
+      - case_management_plans
+    description: Patient care plans and treatment programs - crucial for care management and intervention tracking for high-cost patients.
+    base_table:
+      database: SYNTHETIC_HEALTHCARE_DATA__CLINICAL_AND_CLAIMS
+      schema: SILVER
+      table: CARE_PLANS
+    dimensions:
+      - name: CARE_PLAN_ID
+        synonyms:
+          - plan_id
+          - care_plan_identifier
+          - treatment_plan_id
+        description: Unique identifier for each care plan.
+        expr: CARE_PLAN_ID
+        data_type: NUMBER(38,0)
+      - name: PATIENT_ID
+        synonyms:
+          - patient_number
+          - member_id
+        description: Patient associated with this care plan.
+        expr: PATIENT_ID
+        data_type: NUMBER(38,0)
+      - name: ENCOUNTER_ID
+        synonyms:
+          - visit_id
+          - initiating_encounter
+        description: Encounter during which the care plan was initiated.
+        expr: ENCOUNTER_ID
+        data_type: NUMBER(38,0)
+      - name: CODE
+        synonyms:
+          - care_plan_code
+          - plan_type_code
+        description: Standardized code for the type of care plan.
+        expr: CODE
+        data_type: NUMBER(38,0)
+      - name: DESCRIPTION
+        synonyms:
+          - plan_description
+          - care_plan_type
+          - treatment_description
+        description: Description of the care plan or treatment program.
+        expr: DESCRIPTION
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - Diabetes care
+          - Wound care
+          - Self-care interventions
+      - name: REASONCODE
+        synonyms:
+          - reason_code
+          - indication_code
+        description: Medical reason code for initiating the care plan.
+        expr: REASONCODE
+        data_type: NUMBER(38,0)
+      - name: REASONDESCRIPTION
+        synonyms:
+          - reason_description
+          - indication_description
+        description: Description of why the care plan was initiated.
+        expr: REASONDESCRIPTION
+        data_type: VARCHAR(16777216)
+    time_dimensions:
+      - name: CAREPLAN_START
+        synonyms:
+          - plan_start_date
+          - care_initiation_date
+          - treatment_start
+        description: Date when the care plan was initiated.
+        expr: CAREPLAN_START
+        data_type: DATE
+      - name: CAREPLAN_STOP
+        synonyms:
+          - plan_end_date
+          - care_completion_date
+          - treatment_end
+        description: Date when the care plan was completed or discontinued.
+        expr: CAREPLAN_STOP
+        data_type: DATE
+    primary_key:
+      columns:
+        - CARE_PLAN_ID
+
+relationships:
+  - name: PATIENTS_TO_CLAIMS
+    left_table: CLAIMS
+    right_table: PATIENTS
+    relationship_columns:
+      - left_column: PATIENT_ID
+        right_column: PATIENT_ID
+    relationship_type: many_to_one
+    join_type: left_outer
+
+  - name: PATIENTS_TO_ENCOUNTERS
+    left_table: ENCOUNTERS
+    right_table: PATIENTS
+    relationship_columns:
+      - left_column: PATIENT_ID
+        right_column: PATIENT_ID
+    relationship_type: many_to_one
+    join_type: left_outer
+
+  - name: PATIENTS_TO_CONDITIONS
+    left_table: CONDITIONS
+    right_table: PATIENTS
+    relationship_columns:
+      - left_column: PATIENT_ID
+        right_column: PATIENT_ID
+    relationship_type: many_to_one
+    join_type: left_outer
+
+  - name: PATIENTS_TO_CARE_PLANS
+    left_table: CARE_PLANS
+    right_table: PATIENTS
+    relationship_columns:
+      - left_column: PATIENT_ID
+        right_column: PATIENT_ID
+    relationship_type: many_to_one
+    join_type: left_outer
+
+  - name: CLAIMS_TO_ENCOUNTERS
+    left_table: CLAIMS
+    right_table: ENCOUNTERS
+    relationship_columns:
+      - left_column: ENCOUNTER_ID
+        right_column: ENCOUNTER_ID
+    relationship_type: many_to_one
+    join_type: left_outer
+
+  - name: CLAIMS_TO_PROVIDERS
+    left_table: CLAIMS
+    right_table: PROVIDERS
+    relationship_columns:
+      - left_column: PROVIDER_ID
+        right_column: PROVIDER_ID
+    relationship_type: many_to_one
+    join_type: left_outer
+
+  - name: CLAIMS_TO_PRIMARY_PAYER
+    left_table: CLAIMS
+    right_table: PAYERS
+    relationship_columns:
+      - left_column: PRIMARY_PATIENT_INSURANCE_ID
+        right_column: PAYER_ID
+    relationship_type: many_to_one
+    join_type: left_outer
+
+  - name: CLAIMS_TO_SECONDARY_PAYER
+    left_table: CLAIMS
+    right_table: PAYERS
+    relationship_columns:
+      - left_column: SECONDARY_PATIENT_INSURANCE_ID
+        right_column: PAYER_ID
+    relationship_type: many_to_one
+    join_type: left_outer
+
+  - name: CLAIMS_TX_TO_CLAIMS
+    left_table: CLAIMS_TX
+    right_table: CLAIMS
+    relationship_columns:
+      - left_column: CLAIM_ID
+        right_column: CLAIM_ID
+    relationship_type: many_to_one
+    join_type: left_outer
+
+  - name: ENCOUNTERS_TO_PROVIDERS
+    left_table: ENCOUNTERS
+    right_table: PROVIDERS
+    relationship_columns:
+      - left_column: PROVIDER_ID
+        right_column: PROVIDER_ID
+    relationship_type: many_to_one
+    join_type: left_outer
+
+  - name: ENCOUNTERS_TO_PAYERS
+    left_table: ENCOUNTERS
+    right_table: PAYERS
+    relationship_columns:
+      - left_column: PAYER_ID
+        right_column: PAYER_ID
+    relationship_type: many_to_one
+    join_type: left_outer
+
+  - name: CONDITIONS_TO_ENCOUNTERS
+    left_table: CONDITIONS
+    right_table: ENCOUNTERS
+    relationship_columns:
+      - left_column: ENCOUNTER_ID
+        right_column: ENCOUNTER_ID
+    relationship_type: many_to_one
+    join_type: left_outer
+
+  - name: CARE_PLANS_TO_ENCOUNTERS
+    left_table: CARE_PLANS
+    right_table: ENCOUNTERS
+    relationship_columns:
+      - left_column: ENCOUNTER_ID
+        right_column: ENCOUNTER_ID
+    relationship_type: many_to_one
+    join_type: left_outer
+
+custom_instructions: |
+  1. When generating SQL for high-cost analysis, prioritize patients with HEALTHCARE_EXPENSES + HEALTHCARE_COVERAGE above specified thresholds (e.g., $50,000, $100,000).
+  2. For cost trending analysis, consider both encounter-level costs (TOTAL_CLAIM_COST) and patient-level lifetime costs.
+  3. When analyzing conditions, focus on chronic and expensive conditions like diabetes, cancer, COPD, and cardiovascular disease.
+  4. For care management queries, identify patients without active care plans who might benefit from intervention.
+  5. Use time-based analysis to identify patients with rapidly escalating costs or frequent encounters.
+  6. When generating financial reports, always include both covered and uncovered amounts for complete cost picture.
+  7. For provider analysis, consider both encounter volume (ENCOUNTERS) and average cost per encounter.
+  8. Format currency values with commas for thousands and include dollar signs in results.
+  9. When creating predictive insights, look for patterns in diagnosis codes, encounter frequency, and cost acceleration.
+  10. For risk stratification, consider patient demographics, condition complexity, and historical utilization patterns.
