@@ -109,7 +109,16 @@ LIST @HEALTHCARE_DEMO_STAGE;
 
 
 ## Create Cortex Agent
-_NOTE: this assumes you have setup Snowflake Intelligence according to the [Snowflake Intelligence](https://docs.snowflake.com/en/user-guide/snowflake-cortex/snowflake-intelligence)_ 
+_NOTE: this assumes you have setup Snowflake Intelligence according to the [Snowflake Intelligence](https://docs.snowflake.com/en/user-guide/snowflake-cortex/snowflake-intelligence)_   
+
+Example:
+
+```sql
+-- Create official Snowflake Intelligence infrastructure
+CREATE DATABASE IF NOT EXISTS snowflake_intelligence;
+CREATE SCHEMA IF NOT EXISTS snowflake_intelligence.agents;
+GRANT CREATE AGENT ON SCHEMA snowflake_intelligence.agents TO ROLE ACCOUNTADMIN;
+```
 
 - AI/ML > Agents > Create Agent
 - **Check the box**: `Create this agent for snowflake intelligence`

@@ -36,8 +36,12 @@ This section will walk through the `Secrets Creation`, `Network Rules`, and `Ext
 
 - Step through [01_salesforce_integration_setup.sql](./01_salesforce_integration_setup.sql) in preferred editor.
 
-## Procedure Deployment
+## Data, Procedure Deployment, and Agent Setup
 Select the demo data that you wish to deploy into and follow the steps in that Readme.md file
 
+### Synthea
 - [Synthea Provider Data](./Synthea-Synthetic-Provider-Data/Readme.md)
+
+### HC_PAYER_DATA_PRODUCT_SAMPLE
+https://app.snowflake.com/us-east-1/shb51184/#/data/shared/listing/private/GZTYZV3BWPG?originTab=databases&database=HC_PAYER_DATA_PRODUCT_SAMPLE
 - [TBD Payer Data](#)
