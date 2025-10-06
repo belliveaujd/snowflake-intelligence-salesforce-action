@@ -1,4 +1,5 @@
 # HC Payer Setup
+Demo Creator: Jeevan Rag, Josh Belliveau
 
 ## Initial Setup
 - [010-HC_PAYER_DATA_PRODUCT_SETUP_Phase1.sql](010-HC_PAYER_DATA_PRODUCT_SETUP_Phase1.sql)
@@ -10,7 +11,6 @@ Salesforce(developer edition) URL and Demo credentials
 - URL  : https://snowflake4-dev-ed.develop.lightning.force.com/lightning/o/Care_Plan__c/list?filterName=__Recent
 - User Name :  <EMAIL>
 - Password : <CREDENTIALS>
-JDB: Remove MFA
 
 The above URL takes you to the Care Plans section, which is where the Care Plans pushed by Snowflake Intelligence would be visible.
 
@@ -20,39 +20,37 @@ The above URL takes you to the Care Plans section, which is where the Care Plans
 
 Add the below tools to the agent
 
-### HC_PAYER_DATA_PRODUCT_SEMANTIC_VIEW
-**Payer Data Product Analyst Tool referring semantic view :**  HC_PAYER_DATA_PRODUCT_SAMPLE.HC_PAYER_DATA_PRODUCT.HC_PAYER_DATA_PRODUCT_SEMANTIC_VIEW
-```
-JDB: 
-PREP_DB_HC_PAYER_DATA_PROD.PREP_OBJECTS.HC_PAYER_DATA_PRODUCT_SEMANTIC_VIEW
-   NOT
-HC_PAYER_DATA_PRODUCT_SAMPLE.HC_PAYER_DATA_PRODUCT.HC_PAYER_DATA_PRODUCT_SEMANTIC_VIEW
-```
+### Analyst Semantic View
+**Payer Data Product Analyst Tool referring semantic view :**  `PREP_DB_HC_PAYER_DATA_PROD.PREP_OBJECTS.HC_PAYER_DATA_PRODUCT_SEMANTIC_VIEW`
 
-_JDB: Might want to put FUNCTION/PROC at the start (I missed function vs proc)_
+### Search Tools 
+**Pubmed Search Tool :** 
+- Please install the CKE and refer to that one -  [https://app.snowflake.com/marketplace/listing/GZSTZ67BY9OQW/snowflake-pubmed-biomedical-research-corpus?search=pubmed](https://app.snowflake.com/marketplace/listing/GZSTZ67BY9OQW/snowflake-pubmed-biomedical-research-corpus?search=pubmed)
+- **Add as a Cortex Search:** `PUBMED_BIOMEDICAL_RESEARCH_CORPUS.OA_COMM.PUBMED_OA_CKE_SEARCH_SERVICE`
+- **ID:** `Article_URL`
+- **Title:** `Article_URL`
 
+
+**Care Manager Calls(Audio) Search Tool**  referring cortex search :  `HC_PAYER_DATA_PRODUCT_SAMPLE.HC_PAYER_DATA_PRODUCT.CARE_MANAGER_CALLS_SEARCH_SERVICE`
+- **ID Column**: `SOURCE_URL`
+- **Title Column**: `AUDIO_FILE_NAME`
+- **Name**: `Care_Manager_Call_Search`
+- **Description**: 
+
+**Care Plan Templates(PDF) search Tool referring cortex search:** `HC_PAYER_DATA_PRODUCT_SAMPLE.HC_PAYER_DATA_PRODUCT.CARE_PLAN_TEMPLATES_SEARCH_SERVICE`
+- **ID Column**: `SOURCE_URL`
+- **Title Column**: `TEMPLATE_NAME`
+- **Name**: `CARE_PLAN_TEMPLATES_SEARCH_SERVICE`
+- **Description**: 
+
+### Functions
 **Web Search Tool referring function:** `PREP_DB_HC_PAYER_DATA_PRODUCT.PREP_OBJECTS."WEB_SEARCH"`
 
+**PUBLISH_CARE_PLAN_TO_SALESFORCE Tool referring function :**   `PREP_DB_HC_PAYER_DATA_PRODUCT.PREP_OBJECTS.create_care_plan`
+
+### Procedures
 **Send Email Tool referring procedure:** `PREP_DB_HC_PAYER_DATA_PRODUCT.PREP_OBJECTS."SEND_EMAIL_NOTIFICATION"`
 
-**Pubmed Search Tool :** Please install the CKE and refer to that one -  [https://app.snowflake.com/marketplace/listing/GZSTZ67BY9OQW/snowflake-pubmed-biomedical-research-corpus?search=pubmed](https://app.snowflake.com/marketplace/listing/GZSTZ67BY9OQW/snowflake-pubmed-biomedical-research-corpus?search=pubmed)
-
-**Care Manager Calls(Audio) Search Tool**  referring cortex search :  HC_PAYER_DATA_PRODUCT_SAMPLE.HC_PAYER_DATA_PRODUCT.CARE_MANAGER_CALLS_SEARCH_SERVICE
-
-_JDB: perhaps put info about SOURCE_URL as the ID Column too?_
-- **ID Column**: SOURCE_URL
-- **Title Column**: AUDIO_FILE_NAME
-- **Name**: Care_Manager_Call_Search
-- **Description**: JDB:??
-
-**Care Plan Templates(PDF) search Tool referring cortex search:** HC_PAYER_DATA_PRODUCT_SAMPLE.HC_PAYER_DATA_PRODUCT.CARE_PLAN_TEMPLATES_SEARCH_SERVICE
-- **ID Column**: SOURCE_URL
-- **Title Column**: TEMPLATE_NAME
-- **Name**: CARE_PLAN_TEMPLATES_SEARCH_SERVICE
-- **Description**: JDB:??
-
-**PUBLISH_CARE_PLAN_TO_SALESFORCE Tool referring function :**   PREP_DB_HC_PAYER_DATA_PRODUCT.PREP_OBJECTS.create_care_plan
-- **Care_plan_details**: JDB:??
 
 
 Add the below questions for the demo flow:-
@@ -70,3 +68,8 @@ After successful confirmation show the Care Plan pushed post the interactions wi
 
 
 Detailed Talk track with commentary : WIP
+
+
+## Pending Fixes
+- [ ] Remove MFA
+- [ ] Semantic View with Data Share
