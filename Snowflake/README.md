@@ -43,4 +43,4 @@ Select the demo data that you wish to deploy into and follow the steps in that R
 - [Synthea Provider Data](./Synthea-Synthetic-Provider-Data/Readme.md)
 
 ### HC_PAYER_DATA_PRODUCT_SAMPLE
-- [HC Payer Data](./README.md)
+- [HC Payer Data](./HC-Payer-Synthetic-Data/readme.md)
