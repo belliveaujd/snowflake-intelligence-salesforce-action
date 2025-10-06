@@ -2,7 +2,7 @@
 Demo Creator: Jeevan Rag, Josh Belliveau
 
 ## Initial Setup
-- [010-HC_PAYER_DATA_PRODUCT_SETUP_Phase1.sql](010-HC_PAYER_DATA_PRODUCT_SETUP_Phase1.sql)
+- [010-HC_PAYER_DATA_PRODUCT_SETUP_Phase1.sql](https://drive.google.com/file/d/1ms3vp5_tZnTYY0ZsoFJ1F3pm6PVFUFAC/view)
 - Get the [HC Payer Data Share](https://app.snowflake.com/us-east-1/shb51184/#/data/shared/listing/private/GZTYZV3BWPG?originTab=databases&database=HC_PAYER_DATA_PRODUCT_SAMPLE)
 
 ## Agent Config
