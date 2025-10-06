@@ -11,6 +11,7 @@ Salesforce(developer edition) URL and Demo credentials
 - URL  : https://snowflake4-dev-ed.develop.lightning.force.com/lightning/o/Care_Plan__c/list?filterName=__Recent
 - User Name :  <EMAIL>
 - Password : <CREDENTIALS>
+_**Shared Credentials for Snowflake SEs Here:** [https://docs.google.com/document/d/1lGqIla-iEo5gGEg6uN5nXgF8aSHAIiABzn0Dr90qLQ4/edit?tab=t.0](https://docs.google.com/document/d/1lGqIla-iEo5gGEg6uN5nXgF8aSHAIiABzn0Dr90qLQ4/edit?tab=t.0)_
 
 The above URL takes you to the Care Plans section, which is where the Care Plans pushed by Snowflake Intelligence would be visible.
 
