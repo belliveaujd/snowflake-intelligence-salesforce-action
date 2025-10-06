@@ -4,7 +4,7 @@ This folder contains all tools and documentation for setting up and testing Sale
 
 
 ## Table of Contents
-[Return to Project Home](../Readme.md)
+[Return to Project Home](../README.md)
 
 1. [Prerequisites](#prerequisites)
 2. [Salesforce Developer Instance Setup](#salesforce-developer-instance-setup)
