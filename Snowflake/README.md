@@ -6,7 +6,7 @@ This folder contains all tools and documentation for setting up Snowflake stored
 1. [Prerequisites](#prerequisites)
 2. [Setup Overview](#setup-overview)
 3. [Salesforce Integration Setup](#salesforce-integration-setup)
-4. [Procedure Deployment](#procedure-deployment)
+4. [Procedure Deployment](#data-procedure-deployment-and-agent-setup)
 
 ## Prerequisites
 
@@ -43,5 +43,4 @@ Select the demo data that you wish to deploy into and follow the steps in that R
 - [Synthea Provider Data](./Synthea-Synthetic-Provider-Data/Readme.md)
 
 ### HC_PAYER_DATA_PRODUCT_SAMPLE
-https://app.snowflake.com/us-east-1/shb51184/#/data/shared/listing/private/GZTYZV3BWPG?originTab=databases&database=HC_PAYER_DATA_PRODUCT_SAMPLE
-- [TBD Payer Data](#)
+- [HC Payer Data](./README.md)
